@@ -1,0 +1,209 @@
+//Name : Yugant Manekar
+//Roll No : TIA32
+//Batch : B
+
+
+//Os Lab 3.1
+//Orphan
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<unistd.h>
+
+void main()
+{
+	pid_t pid,temp;
+	pid=fork();
+	if(pid==0)
+	{
+		sleep(3);
+		temp=getpid();
+		printf("\nChild Process ID: %d\n",temp);
+		temp=getppid();
+		printf("Child Parent Process ID: %d\n",temp);
+		printf("Child Child Process ID: %d\n",pid);
+		system("ps");
+	}
+	else
+	{
+		temp=getpid();
+		printf("Parent Process ID: %d\n",temp);
+		temp=getppid();
+		printf("Parent Parent Process ID: %d\n",temp);
+		printf("Parent Child Process ID: %d\n",pid);	
+	}
+}
+
+OUTPUt:
+
+student@student:~/Downloads$ gcc TIA32Orphan.c
+student@student:~/Downloads$ ./a.out
+Parent Process ID: 6704
+Parent Parent Process ID: 6674
+Parent Child Process ID: 6705
+student@student:~/Downloads$ 
+Child Process ID: 6705
+Child Parent Process ID: 937
+Child Child Process ID: 0
+    PID TTY          TIME CMD
+   6674 pts/0    00:00:00 bash
+   6705 pts/0    00:00:00 a.out
+   6706 pts/0    00:00:00 sh
+   6707 pts/0    00:00:00 ps
+
+
+//Os Lab 3.2
+//Zombie
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<sys/wait.h>
+#include<unistd.h>
+
+void main()
+{
+	int status;
+	pid_t pid,temp;
+	pid=fork();
+	if(pid==0)
+	{
+		temp=getpid();
+		printf("Child Process ID: %d\n",temp);
+		temp=getppid();
+		printf("Child Parent Process ID: %d\n",temp);
+		printf("Child Child Process ID: %d\n",pid);
+	}
+	else
+	{
+		system("ps");
+		wait(&status);
+		temp=getpid();
+		printf("Parent Process ID: %d\n",temp);
+		temp=getppid();
+		printf("Parent Parent Process ID: %d\n",temp);
+		printf("Parent Child Process ID: %d\n",pid);	
+	}
+}
+
+OUTPUT:
+
+student@student:~$ cd Downloads
+student@student:~/Downloads$ gcc TIA32_zombie.c
+student@student:~/Downloads$ 
+student@student:~/Downloads$ ./a.out
+Child Process ID: 7215
+Child Parent Process ID: 7214
+Child Child Process ID: 0
+    PID TTY          TIME CMD
+   7187 pts/0    00:00:00 bash
+   7214 pts/0    00:00:00 a.out
+   7215 pts/0    00:00:00 a.out <defunct>
+   7216 pts/0    00:00:00 sh
+   7217 pts/0    00:00:00 ps
+Parent Process ID: 7214
+Parent Parent Process ID: 7187
+Parent Child Process ID: 7215
+student@student:~/Downloads$ ^C
+
+
+
+// Os Lab 3.3
+//sorting
+#include<stdio.h> 
+#include<unistd.h> 
+#include<sys/types.h>
+#include<sys/wait.h>
+void asc_sort(int a[30],int n) 
+{
+	int i,j,temp; 
+	for(i=0;i<n;i++)
+	{
+		for(j=0;j<n-1;j++)
+		{
+			if(a[j]>a[j+1]) 
+			{
+				temp=a[j];
+				a[j]=a[j+1];
+				a[j+1]=temp;
+			}
+		}
+	}
+	printf("Ascending Order \n");
+	for(i=0;i<n;i++)
+	{
+		printf("\t%d",a[i]); 
+	}
+	printf("\n");
+}
+void des_sort(int a[30],int n) 
+
+{
+	int i,j,temp; 
+	for(i=0;i<n;i++)
+	{
+		for(j=0;j<n-1;j++)
+		{
+			if(a[j]<a[j+1]) 
+			{
+				temp=a[j];
+				a[j]=a[j+1];
+				a[j+1]=temp;
+			}
+		}
+	}
+	printf("Descending Order \n");
+	for(i=0;i<n;i++)
+	{
+		printf("\t%d",a[i]); 
+	}
+	printf("\n");
+}
+int main() 
+{
+	int a[30],n,i; 
+	printf("Enter size of array to be sorted:");
+	scanf("%d",&n); 
+	for(i=0;i<n;i++)
+	{
+		printf("Please enter the %dth array elements:",i+1);
+		scanf("%d",&a[i]); 
+		
+	}
+	if(fork()==0) 
+	{
+		printf("\nChild process id=%d\n",getpid());
+
+		des_sort(a,n); 
+	}
+	else
+	{
+		wait(NULL); 
+		
+		printf("\nParent process id=%d\n",getppid());
+
+		asc_sort(a,n); 
+		
+	}
+	return 0;
+}
+
+
+OUTPUT :-
+
+student@student:~$ gcc TIA32_OS_Lab3.c
+student@student:~$ ./a.out
+Enter size of array to be sorted:4
+Please enter the 1th array elements:12
+Please enter the 2th array elements:23
+Please enter the 3th array elements:45
+Please enter the 4th array elements:1
+
+Child process id=5446
+Descending Order 
+	45	23	12	1
+
+Parent process id=5425
+Ascending Order 
+	1	12	23	45
+
